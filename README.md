@@ -2,7 +2,7 @@
 # Integrantes:
 # Franco Hernández Piloto C311
 # Hiván Cañizares Díaz C311
-# Mauricio Reyes Escudero C311
+# Carlos Mauricio Reyes Escudero C311
 
 El objetivo del proyecto es desarrollar una implemetación desde cero de un cliente de un protocolo de la capa de aplicación del modelo TCP/IP. 
 
