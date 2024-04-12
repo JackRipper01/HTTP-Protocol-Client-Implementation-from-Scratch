@@ -1,4 +1,5 @@
 from socket import *
+from urllib.parse import urlparse
 
 # Method to open a TCP connection, returns the tcp socket
 def open_tcp_connection(port, host, retry_count=5):
@@ -101,7 +102,7 @@ def format_iter(iter, isdict=False):
     return rpath
 
 
-def send_http(path, headers={}, port=80, method="GET", host="localhost", body=""):
+def send_http(path, headers={}, port=80, method="GET", host="localhost", body="",counter=5):
     version = "HTTP/1.1"
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
@@ -116,6 +117,11 @@ def send_http(path, headers={}, port=80, method="GET", host="localhost", body=""
     print(head)
     print("VVVVVVVVVVVVVVV BODY VVVVVVVVVVVVVVV")
     print(res_body)
+    res_headers=get_headers_from_res_headers(head)
+    if counter>0 and str(res_headers['Status']).startswith('3'):
+        url_parsed=urlparse(res_headers['Location'])
+        print('redirectioning...')
+        return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1)
     return head,res_body
 
 def get(host,path,headers={}):
