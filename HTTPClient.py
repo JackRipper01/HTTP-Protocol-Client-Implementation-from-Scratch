@@ -1,6 +1,7 @@
 from socket import *
 from urllib.parse import urlparse
 from time import sleep
+import ssl
 # Method to open a TCP connection, returns the tcp socket
 def open_tcp_connection(port, host, retry_count=0):
     if retry_count == 6:
@@ -9,8 +10,12 @@ def open_tcp_connection(port, host, retry_count=0):
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
     clientSocket.settimeout(10) #Set a timeout for the connection
 
+    context=ssl.create_default_context()
+    clientSocket=context.wrap_socket(sock=clientSocket,server_hostname=host)
+    
     try:
         clientSocket.connect((gethostbyname(host), port))
+        print(f'The connection is secure and using {clientSocket.cipher()}') 
     except timeout:
         print("Connection TimeOut. Retrying connection.")
         sleep(2^retry_count)
@@ -103,7 +108,7 @@ def format_iter(iter, isdict=False):
     return rpath
 
 
-def send_http(path, headers={}, port=80, method="GET", host="localhost", body="",counter=5):
+def send_http(path, headers={}, port=443, method="GET", host="localhost", body="",counter=5):
     version = "HTTP/1.1"
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
@@ -141,3 +146,6 @@ def connect(host, port, path,headers={}):
     return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)
 def options(host, port, path,headers={}):
     return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)
+
+if __name__=='__main__':
+    send_http(path='/',method='GET',host='www.google.com',port=443)
