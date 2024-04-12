@@ -70,12 +70,13 @@ def process_text_short(splitted_text):
                         print("!> not passing body")
                     else:
                         body = splitted_text[4].strip()
-                        headers["Content-Length"] = str(len(body))
+                        headers["Content-length"] = str(len(body))
 
     if additional_headers:
         headers['User-Agent'] = "MyHTTPClient/1.0 (Python) Sockets/ Python/31"
         headers['Connection'] = "keep-alive"
-
+    print("AAAAAAAAAAAAAAAAAAAAAAAa")
+    print(headers)
     return op, host, path, headers, body, ended
 
 def process_text_long(splitted_text):
@@ -161,9 +162,9 @@ def run_req(op: str, host, path, headers, body):
     elif op == "HEAD":
         head(host, path, headers)
     elif op == "POST":
-        post(host, path, body, headers)
+        post(host, path, headers, body)
     elif op == "PUT":
-        put(host, path, body, headers)
+        put(host, path, headers, body)
     elif op == "DELETE":
         delete(host, path, headers)
     elif op == "TRACE":
@@ -171,7 +172,7 @@ def run_req(op: str, host, path, headers, body):
     elif op == "CONNECT":
         connect(host, path, headers)
     elif op == "OPTIONS":
-        options(host, path, body, headers)
+        options(host, path, headers)
 
 def long():
     splitted_text = [""]

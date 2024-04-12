@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from time import sleep
 # Method to open a TCP connection, returns the tcp socket
 def open_tcp_connection(port, host, retry_count=0):
-    if retry_count == 5:
+    if retry_count == 6:
         raise Exception("All the retries to connect has been completed.")
 
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
