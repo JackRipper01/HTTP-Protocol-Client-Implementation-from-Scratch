@@ -33,10 +33,67 @@ def send_request(sock: socket, request: str):
     print("^^^^^^^^^^^^^^^^^^^headers^^^^^^^^^^^^^^^^^^^^^")
     return raw_headers, raw_body
 
+# Parses the response headers to a dict and adds the key_value 'Status': status_int
+def get_headers_from_res_headers(res_headers:str):
+    lines = res_headers.split("\r\n")
+    headers = {}
+    # print(lines[0].split(' ')[1])
+    for i in range(len(lines)):
+        if i==0:
+            headers['Status']=int(lines[i].split(' ')[1])
+        elif ": " in lines[i]:
+            header,val = lines[i].split(": ",1)
+            headers[header] = val
+    return headers
 
 # Receives the response headers from the server
 def recv_res(sock: socket):
-    return NotImplementedError
+    response = ''
+    while(not response.endswith('\r\n\r\n')):
+        byte=sock.recv(1)
+        if not byte: break
+        response+=byte.decode()
+    # print(response)
+    headers=get_headers_from_res_headers(response)
+    if 'Content-Length' in headers:
+        body = sock.recv(int(headers['Content-Length']))
+        response +=body.decode()
+    # elif 'Transfer-Encoding' in headers:
+    #     if headers['Transfer-Encoding'] == 'chunked':
+    #         body=''
+    #         while True:
+    #             chunk_size=''
+    #             while not chunk_size.endswith('\r\n'):
+    #                 byte=sock.recv(1)
+    #                 decoded=byte.decode()
+    #                 if decoded=='\r\n': break
+    #                 chunk_size+=decoded
+    #             print('CHUNK_SIZEvvvvvvvvvvvvvv')
+    #             print(chunk_size[:-2])
+    #             print('CHUNK_SIZE^^^^^^^^^^^')
+    #             chunk_size=int(chunk_size[:-2], 16)
+    #             if chunk_size == 0:
+    #                 break
+    #             chunk=''
+    #             while True:
+    #                 chunk_bytes=sock.recv(1)
+    #                 decoded=chunk_bytes.decode()
+    #                 if decoded=='\r\n': break
+    #                 chunk+=decoded
+    #             body+=chunk
+    #             print('VVVVVVVVVVVVVVVV CHUNK VVVVVVVVVVVVVVVVV')
+    #             print(chunk)
+    #         response+=body     
+    # print('RESPONSE')
+    # print(response)  
+    if response:
+        head_body=response.split('\r\n\r\n',1)
+        head=head_body[0]
+        body=head_body[1]
+        return head,body
+    else:
+        return "ERROR","ERROR"
+
 
 
 # Method to form an http message
@@ -72,7 +129,27 @@ def send_http(path, headers={}, port=80, method="GET", host="localhost", body=""
     print(msg)
     print("^^^^^^^^^^^^^^^^^^ My Request ^^^^^^^^^^^^^^^^^^")
     client_socket = open_tcp_connection(port=port, host=host)
-    response = send_request(sock=client_socket, request=msg)
+    head,res_body = send_request(sock=client_socket, request=msg)
     client_socket.close()
-    print(response)
-    return response
+    print(head)
+    print(res_body)
+    return head,res_body
+
+def get(host,path,headers={}):
+    return send_http(path=path,headers=headers,method='GET',host=host)
+def head(host,path,headers={}):
+    return send_http(path=path,headers=headers,method='HEAD',host=host)
+def post(host,path,headers={},body=''):
+    return send_http(path=path,headers=headers,method='POST',host=host,body=body)
+def put(host,path,headers={},body=''):
+    return send_http(path=path,headers=headers,method='PUT',host=host,body=body)
+def delete(host,path,headers={}):
+    return send_http(path=path,headers=headers,method="DELETE",host=host)
+def trace(host,path,headers={}):
+    return send_http(path=path,headers=headers,method='TRACE',host=host)
+def connect(host,path,headers={}):
+    return send_http(path=path,headers=headers,method='CONNECT',host=host)
+def options(host,path,headers={}):
+    return send_http(path=path,headers=headers,method='CONNECT',host=host)
+
+get('www.google.com','/',{})
