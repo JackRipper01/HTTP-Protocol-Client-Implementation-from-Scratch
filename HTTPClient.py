@@ -152,4 +152,4 @@ def connect(host,path,headers={}):
 def options(host,path,headers={}):
     return send_http(path=path,headers=headers,method='CONNECT',host=host)
 
-get('www.google.com','/',{})
+# get('www.google.com','/',{})
