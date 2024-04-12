@@ -6,7 +6,7 @@ def open_tcp_connection(port, host, retry_count=5):
         raise Exception("All the retries to connect has been completed.")
 
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
-    # clientSocket.settimeout(10) Set a timeout for the connection
+    clientSocket.settimeout(10) #Set a timeout for the connection
 
     try:
         clientSocket.connect((gethostbyname(host), port))
@@ -27,10 +27,7 @@ def open_tcp_connection(port, host, retry_count=5):
 def send_request(sock: socket, request: str):
     # sends the request to the server throught the connected socket.
     sock.send(request.encode())
-    print("vvvvvvvvvvvvvvvvvvvvvRESPONSEvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
     raw_headers, raw_body = recv_res(sock)
-    print(raw_headers)
-    print("^^^^^^^^^^^^^^^^^^^headers^^^^^^^^^^^^^^^^^^^^^")
     return raw_headers, raw_body
 
 # Parses the response headers to a dict and adds the key_value 'Status': status_int
@@ -58,34 +55,17 @@ def recv_res(sock: socket):
     if 'Content-Length' in headers:
         body = sock.recv(int(headers['Content-Length']))
         response +=body.decode()
-    # elif 'Transfer-Encoding' in headers:
-    #     if headers['Transfer-Encoding'] == 'chunked':
-    #         body=''
-    #         while True:
-    #             chunk_size=''
-    #             while not chunk_size.endswith('\r\n'):
-    #                 byte=sock.recv(1)
-    #                 decoded=byte.decode()
-    #                 if decoded=='\r\n': break
-    #                 chunk_size+=decoded
-    #             print('CHUNK_SIZEvvvvvvvvvvvvvv')
-    #             print(chunk_size[:-2])
-    #             print('CHUNK_SIZE^^^^^^^^^^^')
-    #             chunk_size=int(chunk_size[:-2], 16)
-    #             if chunk_size == 0:
-    #                 break
-    #             chunk=''
-    #             while True:
-    #                 chunk_bytes=sock.recv(1)
-    #                 decoded=chunk_bytes.decode()
-    #                 if decoded=='\r\n': break
-    #                 chunk+=decoded
-    #             body+=chunk
-    #             print('VVVVVVVVVVVVVVVV CHUNK VVVVVVVVVVVVVVVVV')
-    #             print(chunk)
-    #         response+=body     
-    # print('RESPONSE')
-    # print(response)  
+    elif 'Transfer-Encoding' in headers:
+        if headers['Transfer-Encoding'] == 'chunked':
+            chunk=''
+            while not chunk.endswith('\r\n0'):
+                chunk_bytes=sock.recv(1)
+                try:
+                    decoded=chunk_bytes.decode()
+                    chunk+=decoded
+                except:
+                    pass    
+            response+=chunk
     if response:
         head_body=response.split('\r\n\r\n',1)
         head=head_body[0]
@@ -126,12 +106,15 @@ def send_http(path, headers={}, port=80, method="GET", host="localhost", body=""
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
     )
+    print("VVVVVVVVVVVVVVV My Request VVVVVVVVVVVVVVV")
     print(msg)
-    print("^^^^^^^^^^^^^^^^^^ My Request ^^^^^^^^^^^^^^^^^^")
     client_socket = open_tcp_connection(port=port, host=host)
     head,res_body = send_request(sock=client_socket, request=msg)
     client_socket.close()
+    print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV RESPONSE VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
+    print("VVVVVVVVVVVVVVV HEADERS VVVVVVVVVVVVVVV")
     print(head)
+    print("VVVVVVVVVVVVVVV BODY VVVVVVVVVVVVVVV")
     print(res_body)
     return head,res_body
 
@@ -151,5 +134,3 @@ def connect(host,path,headers={}):
     return send_http(path=path,headers=headers,method='CONNECT',host=host)
 def options(host,path,headers={}):
     return send_http(path=path,headers=headers,method='CONNECT',host=host)
-
-# get('www.google.com','/',{})
