@@ -1,9 +1,9 @@
 from socket import *
 from urllib.parse import urlparse
-
+from time import sleep
 # Method to open a TCP connection, returns the tcp socket
-def open_tcp_connection(port, host, retry_count=5):
-    if retry_count == 0:
+def open_tcp_connection(port, host, retry_count=0):
+    if retry_count == 5:
         raise Exception("All the retries to connect has been completed.")
 
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
@@ -13,7 +13,8 @@ def open_tcp_connection(port, host, retry_count=5):
         clientSocket.connect((gethostbyname(host), port))
     except timeout:
         print("Connection TimeOut. Retrying connection.")
-        return open_tcp_connection(port=port, host=host, retry_count=retry_count - 1)
+        sleep(2^retry_count)
+        return open_tcp_connection(port=port, host=host, retry_count=retry_count + 1)
     except error as e:
         raise Exception(f"Error connecting to server: {e}")
     except Exception as e:
