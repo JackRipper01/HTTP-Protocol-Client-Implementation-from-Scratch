@@ -125,19 +125,19 @@ def send_http(path, headers={}, port=80, method="GET", host="localhost", body=""
         return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1)
     return head,res_body
 
-def get(host,path,headers={}):
-    return send_http(path=path,headers=headers,method='GET',host=host)
-def head(host,path,headers={}):
-    return send_http(path=path,headers=headers,method='HEAD',host=host)
-def post(host,path,headers={},body=''):
-    return send_http(path=path,headers=headers,method='POST',host=host,body=body)
-def put(host,path,headers={},body=''):
-    return send_http(path=path,headers=headers,method='PUT',host=host,body=body)
-def delete(host,path,headers={}):
-    return send_http(path=path,headers=headers,method="DELETE",host=host)
-def trace(host,path,headers={}):
-    return send_http(path=path,headers=headers,method='TRACE',host=host)
-def connect(host,path,headers={}):
-    return send_http(path=path,headers=headers,method='CONNECT',host=host)
-def options(host,path,headers={}):
-    return send_http(path=path,headers=headers,method='CONNECT',host=host)
+def get(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method='GET',host=host, port = port)
+def head(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method='HEAD',host=host, port = port)
+def post(host, port, path,headers={},body=''):
+    return send_http(path=path,headers=headers,method='POST',host=host,body=body, port = port)
+def put(host, port, path,headers={},body=''):
+    return send_http(path=path,headers=headers,method='PUT',host=host,body=body, port = port)
+def delete(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method="DELETE",host=host, port = port)
+def trace(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method='TRACE',host=host, port = port)
+def connect(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)
+def options(host, port, path,headers={}):
+    return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)

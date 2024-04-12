@@ -1,123 +1,86 @@
 from HTTPClient import *
 from urllib.parse import urlparse
+import re
 
-def process_text(splitted_text):
+def parse_prompt(prompt):
+    get_op_re = r"GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|OPTIONS"
+    
+    op = re.search(get_op_re,prompt,re.IGNORECASE)[0]
 
-    op = ""
-    host = ""
-    path = ""
-    headers = {}
-    body = ""
-    additional_headers = False
-    ended = False
+    prompt = prompt.replace(op,"", 1).strip()+" "
 
-    # get op
+    get_url_re = r"^[^\s]*(?=\s)"
+    url = re.search(get_url_re, prompt)[0]
+    urlData=urlparse(url)
+    host=urlData.hostname
+    path = '/'
+    if urlData.path!='':
+        path=urlData.path
+    port=80
+    if urlData.scheme == 'https':
+        port=443
+    if urlData.port != None:
+        port=urlData.port
 
-    if splitted_text[0] == '':
-        print("!!> no operation provided")
-    elif (splitted_text[0].strip()).upper() not in [
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
-        "DELETE",
-        "TRACE",
-        "CONNECT",
-        "OPTIONS",
-        "GET+",
-        "HEAD+",
-        "POST+",
-        "PUT+",
-        "DELETE+",
-        "TRACE+",
-        "CONNECT+",
-        "OPTIONS+",
-    ]:
-        print("!!> invalid operation")
-    else:
-        op = (splitted_text[0].strip()).upper()
-        
-        if str(op).endswith('+'):
-            op = op[:-1]
-            additional_headers = True
+    prompt = prompt.replace(url,"", 1).strip()+" "
 
-        # get host and path
-        if 1 >= len(splitted_text):
-            print("!!> invalid url")
-        else:
-            url = splitted_text[1].strip()
-            
-            urlparts = urlparse(url)
-            
-            host = str(urlparts.hostname)
-            port = 80
-            path = str(urlparts.path)
-            
-            if urlparts == 'https':
-                port = 443
+    headers={}
+    body=''
+    try:
+        get_headers_re=r"^{[^{}]*}(?=\s)"
+        headers_string=re.search(get_headers_re, prompt)[0]
+        headers=eval(headers_string)
+        body = prompt.replace(headers,"", 1).strip()
+        if len(body)!=0:
+            headers["Content-length"] = str(len(body))
+    except:
+        print("!> Error evaluating Headers:") 
+        print(headers_string)
 
-            if urlparts.port != None:
-                port = urlparts.port
-            
-            ended = True
-            # get headers
-            if 2 >= len(splitted_text):
-                print("!!> not passing headers inline, neither body")
-            else:
-                try:
-                    headers = eval(splitted_text[3].strip())
-                except:
-                    print("!!> invalid headers")
-                # get body
-                if 3 >= len(splitted_text):
-                    print("!!> not passing body")
-                else:
-                    body = splitted_text[4].strip()
-                    headers["Content-length"] = str(len(body))
-
-    if additional_headers:
-        headers['User-Agent'] = "MyHTTPClient/1.0 (Python) Sockets/ Python/31"
-        headers['Connection'] = "keep-alive"
-
-    return op, host, port, path, headers, body, ended
+    return op.upper(), host, path, port, headers, body
 
 def run_req(op: str, host, port, path, headers, body):
     if op == "GET":
-        get(host, path, headers)
+        get(host, port, path, headers)
     elif op == "HEAD":
-        head(host, path, headers)
+        head(host, port, path, headers)
     elif op == "POST":
-        post(host, path, headers, body)
+        post(host, port, path, headers, body)
     elif op == "PUT":
-        put(host, path, headers, body)
+        put(host, port, path, headers, body)
     elif op == "DELETE":
-        delete(host, path, headers)
+        delete(host, port, path, headers)
     elif op == "TRACE":
-        trace(host, path, headers)
+        trace(host, port, path, headers)
     elif op == "CONNECT":
-        connect(host, path, headers)
+        connect(host, port, path, headers)
     elif op == "OPTIONS":
-        options(host, path, headers)
+        options(host, port, path, headers)
 
 def run_time():
-    splitted_text = [""]
-    print("!> (long) session opened")
+    print("!> session opened")
     while True:
-
         print('?> ',end = '')
 
         text = input()
-        splitted_text = text.split("", 3)
 
-        if splitted_text[0] == "e":
+        if text == "e":
             break
-
-        op, host, port, path, headers, body, correct = process_text(splitted_text)
-        if not correct:
-            continue
-        print("!> running "+op+" request to '"+host+"', with path '"+ path+"'")
-        run_req(op, host, port, path, headers, body)
-
+        try:
+            op, host, path, port, headers, body = parse_prompt(text)
+        except:
+            print('!> parsing error')
+        try:
+            print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
+            if len(headers.keys())>0:
+                print("  Added Headers:",headers)
+            if len(body)>0:
+                print("  Body:",body)
+            
+            run_req(op, host, port, path, headers, body)
+        except:
+            print("!> error while running request")
+        
     print("!> session closed")
 
 if __name__ == "__main__":
