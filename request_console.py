@@ -2,17 +2,26 @@ from HTTPClient import *
 from urllib.parse import urlparse
 import re
 
-def parse_prompt(prompt):
+def parse_prompt(prompt: str):
     get_op_re = r"GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|OPTIONS"
     
-    op = re.search(get_op_re,prompt,re.IGNORECASE)[0]
-
+    op = re.search(get_op_re,prompt,re.IGNORECASE)
+    
+    if op == None:
+        print("NOOOOOTOP")
+        raise Exception("could not find OP")
+    op=op[0]
     prompt = prompt.replace(op,"", 1).strip()+" "
 
     get_url_re = r"^[^\s]*(?=\s)"
-    url = re.search(get_url_re, prompt)[0]
+    url = re.search(get_url_re, prompt)
+    if url == None:
+        raise Exception("could not find URL")
+    url=url[0]
     urlData=urlparse(url)
     host=urlData.hostname
+    if host==None:
+        raise Exception("could not resolve hostname")
     path = '/'
     if urlData.path!='':
         path=urlData.path
@@ -23,19 +32,24 @@ def parse_prompt(prompt):
         port=urlData.port
 
     prompt = prompt.replace(url,"", 1).strip()+" "
-
+    
+    get_headers_re=r"^{[^{}]*}(?=\s)"
     headers={}
     body=''
-    try:
-        get_headers_re=r"^{[^{}]*}(?=\s)"
-        headers_string=re.search(get_headers_re, prompt)[0]
-        headers=eval(headers_string)
-        body = prompt.replace(headers,"", 1).strip()
-        if len(body)!=0:
-            headers["Content-length"] = str(len(body))
-    except:
-        print("!> Error evaluating Headers:") 
-        print(headers_string)
+    headers_string=re.search(get_headers_re, prompt)
+    if headers_string==None:
+        print("!> could not find headers")
+        body=prompt.strip()
+    else:
+        headers_string=headers_string[0]
+        try:
+            headers=eval(headers_string)
+            body = prompt.replace(headers_string,"", 1).strip()
+            if len(body)!=0:
+                headers["Content-length"] = str(len(body))
+        except:
+            print("!> Error evaluating Headers:") 
+            print(headers_string)
 
     return op.upper(), host, path, port, headers, body
 
@@ -60,6 +74,7 @@ def run_req(op: str, host, port, path, headers, body):
 def run_time():
     print("!> session opened")
     while True:
+        op = host = port = path = headers = body = None
         print('?> ',end = '')
 
         text = input()
@@ -68,18 +83,22 @@ def run_time():
             break
         try:
             op, host, path, port, headers, body = parse_prompt(text)
-        except:
-            print('!> parsing error')
-        try:
-            print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
-            if len(headers.keys())>0:
-                print("  Added Headers:",headers)
-            if len(body)>0:
-                print("  Body:",body)
             
-            run_req(op, host, port, path, headers, body)
-        except:
-            print("!> error while running request")
+            try:
+                print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
+                if len(headers.keys())>0:
+                    print("  Added Headers:",headers)
+                if len(body)>0:
+                    print("  Body:",body)
+            
+                run_req(op, host, port, path, headers, body)
+            except:
+                print("!> error while running request")
+            
+        except Exception as e:
+            print('!> parsing error')
+            print("!> details:",e)
+        
         
     print("!> session closed")
 

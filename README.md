@@ -6,5 +6,9 @@
 
 Para iniciar basta con ejecutar `request_console.py` y hacer el request de la siguiente forma:
 ```
-head http://cubadebate.cu:84 {'header1': 'value1 (ya se puede usar ;)', 'header2': 'value2'} (algo en el body)
+post http://cubadebate.cu:84 {'header1': 'value1 (ya se puede usar ;)', 'header2': 'value2'} (algo en el body)
+```
+Tambien puede pasar algo en el body sin pasar headers:
+```
+get http://cubadebate.cu:84 (algo en el body)
 ```
