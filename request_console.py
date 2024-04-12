@@ -92,8 +92,9 @@ def run_time():
                     print("  Body:",body)
             
                 run_req(op, host, port, path, headers, body)
-            except:
+            except Exception as e:
                 print("!> error while running request")
+                print("!> details:",e)
             
         except Exception as e:
             print('!> parsing error')
