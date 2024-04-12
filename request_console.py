@@ -148,7 +148,7 @@ def process_text_long(splitted_text):
                         print("!!> not passing body")
                     else:
                         body = splitted_text[4].strip()
-                        headers["Content-Length"] = str(len(body))
+                        headers["Content-length"] = str(len(body))
 
     if additional_headers:
         headers['User-Agent'] = "MyHTTPClient/1.0 (Python) Sockets/ Python/31"
