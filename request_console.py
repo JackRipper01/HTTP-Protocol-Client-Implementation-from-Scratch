@@ -25,9 +25,7 @@ def parse_prompt(prompt: str):
     path = '/'
     if urlData.path!='':
         path=urlData.path
-    port=80
-    if urlData.scheme == 'https':
-        port=443
+    port=443
     if urlData.port != None:
         port=urlData.port
 
@@ -44,6 +42,8 @@ def parse_prompt(prompt: str):
         headers_string=headers_string[0]
         try:
             headers=eval(headers_string)
+            if not (type(headers) is dict):
+                raise Exception(type(headers)+" no coincide con dict")
             body = prompt.replace(headers_string,"", 1).strip()
             if len(body)!=0:
                 headers["Content-length"] = str(len(body))
