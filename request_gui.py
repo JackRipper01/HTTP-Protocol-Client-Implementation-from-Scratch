@@ -27,7 +27,7 @@ drop.grid(column=0,row=0)
 
 url_entry = Entry(root,name='asdasfas', width = 37)
 url_entry.grid(column = 1, row = 0)
-url_entry.insert(INSERT, 'https://www.google.com:443')
+url_entry.insert(INSERT, 'https://google.com:443')
 
 header_entry = scrolledtext.ScrolledText(root, width = 70, height = 7)
 header_entry.grid(column = 0,columnspan=230, row = 1)
@@ -76,22 +76,32 @@ def parse_app():
 
     return op, host, port, path, headers, body
 
+def erase_content_length(headers_c: dict):
+    if 'Content-length' in headers_c.keys():
+        headers_c.pop('Content-length')
+
 def run_req(op: str, host, port, path, headers, body):
     if op == "GET":
+        erase_content_length(headers)
         get(host, port, path, headers)
     elif op == "HEAD":
+        erase_content_length(headers)
         head(host, port, path, headers)
     elif op == "POST":
         post(host, port, path, headers, body)
     elif op == "PUT":
         put(host, port, path, headers, body)
     elif op == "DELETE":
+        erase_content_length(headers)
         delete(host, port, path, headers)
     elif op == "TRACE":
+        erase_content_length(headers)
         trace(host, port, path, headers)
     elif op == "CONNECT":
+        erase_content_length(headers)
         connect(host, port, path, headers)
     elif op == "OPTIONS":
+        erase_content_length(headers)
         options(host, port, path, headers)
 
 def clicked():

@@ -15,7 +15,7 @@ def open_tcp_connection(port, host, retry_count=0):
     
     try:
         clientSocket.connect((gethostbyname(host), port))
-        print("!> TCP CONNECTION OPENED")
+        print("\n!> TCP CONNECTION OPENED")
         print(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
     except timeout:
         print("Connection TimeOut. Retrying connection.")
