@@ -19,5 +19,5 @@ get http://cubadebate.cu:84 (algo en el body)
 
 #### GUI
 Para iniciarla basta con ejecutar `request_gui.py`, mostrando la interfaz:
-[!gui.png]
+![image](gui.png)
 En esta se encuentra cada campo con el ejemplo que ilustra su fin, una vez se presiona `send` para enviar el request, los resultados apareceran en la consola en que se llama al `.py`
