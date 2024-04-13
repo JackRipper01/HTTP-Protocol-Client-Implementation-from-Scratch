@@ -87,9 +87,9 @@ def run_time():
             try:
                 print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
                 if len(headers.keys())>0:
-                    print("  Added Headers:",headers)
+                    print("!>  Added Headers:",headers)
                 if len(body)>0:
-                    print("  Body:",body)
+                    print("!>  Body:\n",body)
             
                 run_req(op, host, port, path, headers, body)
             except Exception as e:

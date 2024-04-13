@@ -5,7 +5,7 @@ import ssl
 # Method to open a TCP connection, returns the tcp socket
 def open_tcp_connection(port, host, retry_count=0):
     if retry_count == 6:
-        raise Exception("All the retries to connect has been completed.")
+        raise Exception("All the retries to connect has been completed unsuccessfully.")
 
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
     clientSocket.settimeout(10) #Set a timeout for the connection
@@ -15,7 +15,8 @@ def open_tcp_connection(port, host, retry_count=0):
     
     try:
         clientSocket.connect((gethostbyname(host), port))
-        print(f'The connection is secure and using {clientSocket.cipher()}') 
+        print("!> TCP CONNECTION OPENED")
+        print(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
     except timeout:
         print("Connection TimeOut. Retrying connection.")
         sleep(2^retry_count)
@@ -24,9 +25,7 @@ def open_tcp_connection(port, host, retry_count=0):
         raise Exception(f"Error connecting to server: {e}")
     except Exception as e:
         raise Exception(f"An unexpected error has ocurred. {e}")
-    print(
-        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!tcp connection has been opened!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    )
+    
     return clientSocket
 
 
@@ -113,20 +112,21 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
     )
-    print("VVVVVVVVVVVVVVV My Request VVVVVVVVVVVVVVV")
+    print()
+    print("!> REQUEST MESSAGE")
     print(msg)
     client_socket = open_tcp_connection(port=port, host=host)
     head,res_body = send_request(sock=client_socket, request=msg)
     client_socket.close()
-    print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV RESPONSE VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
-    print("VVVVVVVVVVVVVVV HEADERS VVVVVVVVVVVVVVV")
-    print(head)
-    print("VVVVVVVVVVVVVVV BODY VVVVVVVVVVVVVVV")
+    print('!>RESPONSE')
+    print("!>  HEADERS")
+    print(head,"\n")
+    print("!>  BODY")
     print(res_body)
     res_headers=get_headers_from_res_headers(head)
     if counter>0 and str(res_headers['Status']).startswith('3'):
         url_parsed=urlparse(res_headers['Location'])
-        print('redirectioning...')
+        print('!> redirectioning...')
         return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1)
     return head,res_body
 

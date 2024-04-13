@@ -3,6 +3,7 @@ from tkinter.ttk import *
 from urllib.parse import urlparse
 from tkinter import scrolledtext
 from HTTPClient import *
+import subprocess
 
 root = Tk()
 root.title("cliente http")
@@ -94,6 +95,12 @@ def run_req(op: str, host, port, path, headers, body):
         options(host, port, path, headers)
 
 def clicked():
+
+    try:
+        subprocess.run('cls',check=True)
+    except Exception as e:
+        subprocess.run('clear', check= True)
+
     op = host = port = path = headers = body = None
 
     try:
@@ -102,11 +109,11 @@ def clicked():
         try:
             print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
             if len(headers.keys())>0:
-                    print("  Added Headers:",headers)
+                    print("!>  Added Headers:",headers)
             if len(body)>0:
-                    print("  Body:",body)
+                    print("!>  Body:\n",body)
             run_req(op,host,port,path,headers,body)
-            print("!> success (meaning it reached the end, whatever status it returns)")
+            print("\n!> end of request response")
         except Exception as e:
             print("!> error while running request")
             print("!> details:",e)
