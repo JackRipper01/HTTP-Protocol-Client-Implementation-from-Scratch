@@ -106,6 +106,7 @@ def clicked():
             if len(body)>0:
                     print("  Body:",body)
             run_req(op,host,port,path,headers,body)
+            print("!> success (meaning it reached the end, whatever status it returns)")
         except Exception as e:
             print("!> error while running request")
             print("!> details:",e)
