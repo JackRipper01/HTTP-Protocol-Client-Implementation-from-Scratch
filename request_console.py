@@ -37,7 +37,7 @@ def parse_prompt(prompt: str):
     body=''
     headers_string=re.search(get_headers_re, prompt)
     if headers_string==None:
-        print("!> could not find headers")
+        print_warning("!> could not find headers")
         body=prompt.strip()
     else:
         headers_string=headers_string[0]
@@ -49,13 +49,13 @@ def parse_prompt(prompt: str):
             if len(body)!=0:
                 headers["Content-length"] = str(len(body))
         except:
-            print("!> Error evaluating Headers:") 
+            print_error("!> Error evaluating Headers:") 
             print(headers_string)
 
     return op.upper(), host, path, port, headers, body, use_ssl
 
 def run_time():
-    print("!> session opened")
+    print_header("!> session opened")
     while True:
         op = host = port = path = headers = body = use_ssl = None
         print('?> ',end = '')
@@ -68,7 +68,7 @@ def run_time():
             op, host, path, port, headers, body, use_ssl = parse_prompt(text)
             
             try:
-                print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path, "| SSL:", use_ssl)
+                print_linebold("\n!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path, "| SSL:", use_ssl)
                 if len(headers.keys())>0:
                     print("!>  Added Headers:",headers)
                 if len(body)>0:
@@ -76,15 +76,15 @@ def run_time():
             
                 run_req(op, host, port, path, headers, body, use_ssl)
             except Exception as e:
-                print("!> error while running request")
+                print_error("!> error while running request")
                 print("!> details:",e)
             
         except Exception as e:
-            print('!> parsing error')
+            print_error('!> parsing error')
             print("!> details:",e)
         
         
-    print("!> session closed")
+    print_error("!> session closed")
 
 if __name__ == "__main__":
     run_time()

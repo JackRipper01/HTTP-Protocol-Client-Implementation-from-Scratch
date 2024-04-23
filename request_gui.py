@@ -70,7 +70,8 @@ def parse_app():
             headers = {}
             raise Exception(type(headers)+" no coincide con dict")
     except Exception as e:
-        print("!> error parsing or evaluating Headers", e)
+        print_error("!> error parsing or evaluating Headers")
+        print_error("!> details:",e)
     
     body = body_entry.get("1.0",'end-1c').strip()
     if len(body)!=0:
@@ -90,7 +91,7 @@ def clicked():
         op, host, port, path, headers, body, use_ssl = parse_app()
 
         try:
-            print("!> running", "OP:", op, "| Host:", host, "| Port:", port, "| Path:", path, "| SSL:", use_ssl)
+            print_linebold("\n!> running", "OP:", op, "| Host:", host, "| Port:", port, "| Path:", path, "| SSL:", use_ssl)
             if len(headers.keys())>0:
                     print("!>  Added Headers:",headers)
             if len(body)>0:
@@ -98,13 +99,13 @@ def clicked():
             run_req(op,host,port,path,headers,body, use_ssl)
 
         except Exception as e:
-            print("!> error while running request")
-            print("!> details:", e)
+            print_error("!> error while running request")
+            print_error("!> details:", e)
             #traceback.print_exc()
 
     except Exception as e:
-        print("!> parse error")
-        print("!> details:",e)
+        print_error("!> parse error")
+        print_error("!> details:",e)
 
 btn = Button(root, text = "send", command = clicked)
 btn.grid(column = 3, row = 0)

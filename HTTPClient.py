@@ -2,6 +2,7 @@ from socket import *
 from urllib.parse import urlparse
 from time import sleep
 import ssl
+from coloring import *
 
 #import traceback
 
@@ -19,11 +20,11 @@ def open_tcp_connection(port, host, retry_count=0, use_ssl = True):
     
     try:
         clientSocket.connect((gethostbyname(host), port))
-        print("\n!> TCP CONNECTION OPENED")
+        print_success("\n!> TCP CONNECTION OPENED")
         if use_ssl:
-            print(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
+            print_success(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
     except timeout:
-        print("Connection TimeOut. Retrying connection.")
+        print_warning("Connection TimeOut. Retrying connection.")
         sleep(2^retry_count)
         return open_tcp_connection(port=port, host=host, retry_count=retry_count + 1,use_ssl=use_ssl)
     except error as e:
@@ -117,21 +118,33 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
     )
-    print()
-    print("!> REQUEST MESSAGE")
+
+    print_header("\n!> REQUEST MESSAGE")
     print(msg)
     client_socket = open_tcp_connection(port=port, host=host, use_ssl = use_ssl)
     head,res_body = send_request(sock=client_socket, request=msg)
     client_socket.close()
-    print('!>RESPONSE')
-    print("!>  HEADERS")
-    print(head,"\n")
-    print("!>  BODY")
-    print(res_body)
+
     res_headers=get_headers_from_res_headers(head)
+
+    print_header('!>RESPONSE')
+    print_header("!>  HEADERS")
+
+    if str(res_headers['Status']).startswith('2'): 
+        print_OK_200(head,"\n")
+    elif str(res_headers['Status']).startswith('3'):
+        print_warn_300(head,"\n")
+    elif str(res_headers['Status']).startswith('4'):
+        print_fail_400(head,"\n")
+    else:
+        print_fail_400(head,"\n")
+
+    print_header("!>  BODY")
+    print(res_body)
+    
     if counter>0 and str(res_headers['Status']).startswith('3'):
         url_parsed=urlparse(res_headers['Location'])
-        print("\n!> redirecting to:", res_headers['Location'])
+        print_linebold("\n!> redirecting to:", res_headers['Location'])
         #print(url_parsed.path,'\n',headers,'\n',port,'\n', url_parsed.hostname, '\n', body, '\n', counter)
         return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1, use_ssl= use_ssl)
     return head,res_body
@@ -154,4 +167,4 @@ def options(host, port, path,headers={}, use_ssl = True):
     return send_http(path=path,headers=headers,method='OPTIONS',host=host, port = port, use_ssl = use_ssl)
 
 if __name__=='__main__':
-    send_http(path='/',method='GET',host='www.google.com',port=443)
+    send_http(path='/',method='GET',host='google.com',port=443)

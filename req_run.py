@@ -27,4 +27,4 @@ def run_req(op: str, host, port, path, headers, body, _use_ssl):
     elif op == "OPTIONS":
         erase_content_length(headers)
         options(host, port, path, headers, use_ssl = _use_ssl)
-    print("\n!> end of request response")
+    print_linebold("\n!> end of request response")
