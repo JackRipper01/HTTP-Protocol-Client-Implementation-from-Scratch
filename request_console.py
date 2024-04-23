@@ -8,7 +8,6 @@ def parse_prompt(prompt: str):
     op = re.search(get_op_re,prompt,re.IGNORECASE)
     
     if op == None:
-        print("NOOOOOTOP")
         raise Exception("could not find OP")
     op=op[0]
     prompt = prompt.replace(op,"", 1).strip()+" "
