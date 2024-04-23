@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter.ttk import *
-from urllib.parse import urlparse
 from tkinter import scrolledtext
 from HTTPClient import *
 import subprocess
@@ -52,7 +51,6 @@ def parse_app():
     urlData=urlparse(url)
     host=urlData.hostname
     use_ssl = urlData.scheme == 'https'
-    print("USING SSL")
     if host==None:
         raise Exception("could not resolve hostname")
     path = '/'
@@ -131,7 +129,7 @@ def clicked():
         except Exception as e:
             print("!> error while running request")
             print("!> details:", e)
-            traceback.print_exc()
+            #traceback.print_exc()
 
     except Exception as e:
         print("!> parse error")

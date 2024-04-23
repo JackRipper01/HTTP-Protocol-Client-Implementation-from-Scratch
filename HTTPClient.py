@@ -3,27 +3,29 @@ from urllib.parse import urlparse
 from time import sleep
 import ssl
 
-import traceback
+#import traceback
 
 # Method to open a TCP connection, returns the tcp socket
-def open_tcp_connection(port, host, retry_count=0):
+def open_tcp_connection(port, host, retry_count=0, use_ssl = True):
     if retry_count == 6:
         raise Exception("All the retries to connect has been completed unsuccessfully.")
 
     clientSocket = socket(AF_INET, SOCK_STREAM)  # Creating socket
     clientSocket.settimeout(10) #Set a timeout for the connection
 
-    context=ssl.create_default_context()
-    clientSocket=context.wrap_socket(sock=clientSocket,server_hostname=host)
+    if use_ssl:
+        context=ssl.create_default_context()
+        clientSocket=context.wrap_socket(sock=clientSocket,server_hostname=host)
     
     try:
         clientSocket.connect((gethostbyname(host), port))
         print("\n!> TCP CONNECTION OPENED")
-        print(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
+        if use_ssl:
+            print(f'!>  The connection is secure and using {clientSocket.cipher()}\n') 
     except timeout:
         print("Connection TimeOut. Retrying connection.")
         sleep(2^retry_count)
-        return open_tcp_connection(port=port, host=host, retry_count=retry_count + 1)
+        return open_tcp_connection(port=port, host=host, retry_count=retry_count + 1,use_ssl=use_ssl)
     except error as e:
         raise Exception(f"Error connecting to server: {e}")
     except Exception as e:
@@ -118,7 +120,7 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
     print()
     print("!> REQUEST MESSAGE")
     print(msg)
-    client_socket = open_tcp_connection(port=port, host=host)
+    client_socket = open_tcp_connection(port=port, host=host, use_ssl = use_ssl)
     head,res_body = send_request(sock=client_socket, request=msg)
     client_socket.close()
     print('!>RESPONSE')
@@ -129,8 +131,9 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
     res_headers=get_headers_from_res_headers(head)
     if counter>0 and str(res_headers['Status']).startswith('3'):
         url_parsed=urlparse(res_headers['Location'])
-        print('!> redirectioning...')
-        return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1)
+        print('!> redirecting to', url_parsed.hostname)
+        #print(url_parsed.path,'\n',headers,'\n',port,'\n', url_parsed.hostname, '\n', body, '\n', counter)
+        return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1, use_ssl= use_ssl)
     return head,res_body
 
 def get(host, port, path,headers={}, use_ssl = True):
