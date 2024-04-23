@@ -2,6 +2,9 @@ from socket import *
 from urllib.parse import urlparse
 from time import sleep
 import ssl
+
+import traceback
+
 # Method to open a TCP connection, returns the tcp socket
 def open_tcp_connection(port, host, retry_count=0):
     if retry_count == 6:
@@ -107,7 +110,7 @@ def format_iter(iter, isdict=False):
     return rpath
 
 
-def send_http(path, headers={}, port=443, method="GET", host="localhost", body="",counter=5):
+def send_http(path, headers={}, port=443, method="GET", host="localhost", body="",counter=5, use_ssl = True):
     version = "HTTP/1.1"
     msg = get_http_msg(
         path=path, headers=headers, method=method, host=host, body=body, version=version
@@ -130,22 +133,22 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
         return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1)
     return head,res_body
 
-def get(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method='GET',host=host, port = port)
-def head(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method='HEAD',host=host, port = port)
-def post(host, port, path,headers={},body=''):
-    return send_http(path=path,headers=headers,method='POST',host=host,body=body, port = port)
-def put(host, port, path,headers={},body=''):
-    return send_http(path=path,headers=headers,method='PUT',host=host,body=body, port = port)
-def delete(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method="DELETE",host=host, port = port)
-def trace(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method='TRACE',host=host, port = port)
-def connect(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)
-def options(host, port, path,headers={}):
-    return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port)
+def get(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method='GET',host=host, port = port, use_ssl = use_ssl)
+def head(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method='HEAD',host=host, port = port, use_ssl = use_ssl)
+def post(host, port, path,headers={},body='', use_ssl = True):
+    return send_http(path=path,headers=headers,method='POST',host=host,body=body, port = port, use_ssl = use_ssl)
+def put(host, port, path,headers={},body='', use_ssl = True):
+    return send_http(path=path,headers=headers,method='PUT',host=host,body=body, port = port, use_ssl = use_ssl)
+def delete(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method="DELETE",host=host, port = port, use_ssl = use_ssl)
+def trace(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method='TRACE',host=host, port = port, use_ssl = use_ssl)
+def connect(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method='CONNECT',host=host, port = port, use_ssl = use_ssl)
+def options(host, port, path,headers={}, use_ssl = True):
+    return send_http(path=path,headers=headers,method='OPTIONS',host=host, port = port, use_ssl = use_ssl)
 
 if __name__=='__main__':
     send_http(path='/',method='GET',host='www.google.com',port=443)

@@ -9,7 +9,7 @@ root = Tk()
 root.title("cliente http")
 root.geometry('500x311')
 
-options=[
+available_operations=[
 "GET",
 "HEAD",
 "POST",
@@ -22,7 +22,7 @@ options=[
 
 opdrop=StringVar(root,'GET','GET')
 
-drop = OptionMenu(root, opdrop,'GET',*options) 
+drop = OptionMenu(root, opdrop,'GET',*available_operations) 
 drop.grid(column=0,row=0)
 
 url_entry = Entry(root,name='asdasfas', width = 37)
@@ -51,12 +51,16 @@ def parse_app():
     url = url_entry.get().strip()
     urlData=urlparse(url)
     host=urlData.hostname
+    use_ssl = urlData.scheme == 'https'
+    print("USING SSL")
     if host==None:
         raise Exception("could not resolve hostname")
     path = '/'
     if urlData.path!='':
         path=urlData.path
-    port=443
+    port = 80
+    if use_ssl:
+        port = 443
     if urlData.port != None:
         port=urlData.port
 
@@ -74,59 +78,60 @@ def parse_app():
     if len(body)!=0:
         headers["Content-length"] = str(len(body))
 
-    return op, host, port, path, headers, body
+    return op, host, port, path, headers, body, use_ssl
 
 def erase_content_length(headers_c: dict):
     if 'Content-length' in headers_c.keys():
         headers_c.pop('Content-length')
 
-def run_req(op: str, host, port, path, headers, body):
+def run_req(op: str, host, port, path, headers, body, _use_ssl):
     if op == "GET":
         erase_content_length(headers)
-        get(host, port, path, headers)
+        get(host, port, path, headers, use_ssl = _use_ssl)
     elif op == "HEAD":
         erase_content_length(headers)
-        head(host, port, path, headers)
+        head(host, port, path, headers, use_ssl = _use_ssl)
     elif op == "POST":
-        post(host, port, path, headers, body)
+        post(host, port, path, headers, body, use_ssl = _use_ssl)
     elif op == "PUT":
-        put(host, port, path, headers, body)
+        put(host, port, path, headers, body, use_ssl = _use_ssl)
     elif op == "DELETE":
         erase_content_length(headers)
-        delete(host, port, path, headers)
+        delete(host, port, path, headers, use_ssl = _use_ssl)
     elif op == "TRACE":
         erase_content_length(headers)
-        trace(host, port, path, headers)
+        trace(host, port, path, headers, use_ssl = _use_ssl)
     elif op == "CONNECT":
         erase_content_length(headers)
-        connect(host, port, path, headers)
+        connect(host, port, path, headers, use_ssl = _use_ssl)
     elif op == "OPTIONS":
         erase_content_length(headers)
-        options(host, port, path, headers)
+        print(options)
+        options(host, port, path, headers, use_ssl = _use_ssl)
 
 def clicked():
-
     try:
         subprocess.run('cls',check=True)
-    except Exception as e:
+    except:
         subprocess.run('clear', check= True)
 
-    op = host = port = path = headers = body = None
+    op = host = port = path = headers = body = use_ssl = None
 
     try:
-        op, host, port, path, headers, body = parse_app()
+        op, host, port, path, headers, body, use_ssl = parse_app()
 
         try:
-            print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
+            print("!> running", "OP:", op, "| Host:", host, "| Port:", port, "| Path:", path, "| SSL:", use_ssl)
             if len(headers.keys())>0:
                     print("!>  Added Headers:",headers)
             if len(body)>0:
                     print("!>  Body:\n",body)
-            run_req(op,host,port,path,headers,body)
+            run_req(op,host,port,path,headers,body, use_ssl)
             print("\n!> end of request response")
         except Exception as e:
             print("!> error while running request")
-            print("!> details:",e)
+            print("!> details:", e)
+            traceback.print_exc()
 
     except Exception as e:
         print("!> parse error")
