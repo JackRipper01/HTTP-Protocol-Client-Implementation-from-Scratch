@@ -1,5 +1,4 @@
-from HTTPClient import *
-from urllib.parse import urlparse
+from req_run import *
 import re
 
 def parse_prompt(prompt: str):
@@ -18,13 +17,16 @@ def parse_prompt(prompt: str):
         raise Exception("could not find URL")
     url=url[0]
     urlData=urlparse(url)
+    use_ssl = urlData.scheme == 'https'
     host=urlData.hostname
     if host==None:
         raise Exception("could not resolve hostname")
     path = '/'
     if urlData.path!='':
         path=urlData.path
-    port=443
+    port=80
+    if use_ssl:
+        port = 443
     if urlData.port != None:
         port=urlData.port
 
@@ -50,30 +52,12 @@ def parse_prompt(prompt: str):
             print("!> Error evaluating Headers:") 
             print(headers_string)
 
-    return op.upper(), host, path, port, headers, body
-
-def run_req(op: str, host, port, path, headers, body):
-    if op == "GET":
-        get(host, port, path, headers)
-    elif op == "HEAD":
-        head(host, port, path, headers)
-    elif op == "POST":
-        post(host, port, path, headers, body)
-    elif op == "PUT":
-        put(host, port, path, headers, body)
-    elif op == "DELETE":
-        delete(host, port, path, headers)
-    elif op == "TRACE":
-        trace(host, port, path, headers)
-    elif op == "CONNECT":
-        connect(host, port, path, headers)
-    elif op == "OPTIONS":
-        options(host, port, path, headers)
+    return op.upper(), host, path, port, headers, body, use_ssl
 
 def run_time():
     print("!> session opened")
     while True:
-        op = host = port = path = headers = body = None
+        op = host = port = path = headers = body = use_ssl = None
         print('?> ',end = '')
 
         text = input()
@@ -81,16 +65,16 @@ def run_time():
         if text == "e":
             break
         try:
-            op, host, path, port, headers, body = parse_prompt(text)
+            op, host, path, port, headers, body, use_ssl = parse_prompt(text)
             
             try:
-                print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path)
+                print("!> running","OP:",op,"| Host:",host,"| Port:",port,"| Path:",path, "| SSL:", use_ssl)
                 if len(headers.keys())>0:
                     print("!>  Added Headers:",headers)
                 if len(body)>0:
                     print("!>  Body:\n",body)
             
-                run_req(op, host, port, path, headers, body)
+                run_req(op, host, port, path, headers, body, use_ssl)
             except Exception as e:
                 print("!> error while running request")
                 print("!> details:",e)
