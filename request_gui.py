@@ -3,6 +3,7 @@ from tkinter.ttk import *
 from tkinter import scrolledtext
 import subprocess
 from req_run import *
+import os
 
 root = Tk()
 root.title("cliente http")
@@ -81,9 +82,9 @@ def parse_app():
 
 def clicked():
     try:
-        subprocess.run('cls',check=True)
-    except:
         subprocess.run('clear', check= True)
+    except:
+        os.system('cls')
 
     op = host = port = path = headers = body = use_ssl = None
 

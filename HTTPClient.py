@@ -144,7 +144,7 @@ def send_http(path, headers={}, port=443, method="GET", host="localhost", body="
     
     if counter>0 and str(res_headers['Status']).startswith('3'):
         url_parsed=urlparse(res_headers['Location'])
-        print_linebold("\n!> redirecting to:", res_headers['Location'])
+        print_linebold("\n!> redirecting to:", bcolors.UNDERLINE+res_headers['Location'])
         #print(url_parsed.path,'\n',headers,'\n',port,'\n', url_parsed.hostname, '\n', body, '\n', counter)
         return send_http(path=url_parsed.path,headers=headers,port=port,method=method,host=url_parsed.hostname,body=body,counter=counter-1, use_ssl= use_ssl)
     return head,res_body
